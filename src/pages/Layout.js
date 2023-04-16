@@ -6,7 +6,7 @@ import Footer from '../component/Footer'
 export default function Layout() {
   return (
     <>
-    <div>
+    {/* <div>
   <div className="preloader">
     <div className="preloader-inner">
       <div className="preloader-icon">
@@ -19,7 +19,7 @@ export default function Layout() {
   <a href="#0" className="scrollToTop">
     <i className="fas fa-angle-up" />
   </a>
-</div>
+</div> */}
 
     
     <Header/>
