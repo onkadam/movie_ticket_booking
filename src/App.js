@@ -1,39 +1,85 @@
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
+import React, { createContext, useEffect, useState } from 'react';
+import axios from 'axios';
+import { BACKEND_URL, FRONTEND_URL} from './helper/Helper';
+
 import Layout from './pages/Layout';
 import NoPage from './pages/NoPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
-import MovieDetails from './pages/MovieDetails';
-import MovieList from './pages/MovieList';
-import MovieSeatPlan from './pages/MovieSeatPlan';
-import MovieTicketPlan from './pages/MovieTicketPlan';
-import MovieCheckout from './pages/MovieCheckout';
-import Popcorn from './pages/Popcorn';
+import { allPublicRoutes } from './routes/allRoutes';
 
+// export const initialState={
+//   movies:[ {
+//     name:'Alone2',
+//     image:'http://pixner.net/boleto/demo/assets/images/movie/movie01.jpg'
+//   },
+//   {
+//     name:'Mars2',
+//     image:"http://pixner.net/boleto/demo/assets/images/movie/movie02.jpg"
+//   },
+//   {
+//     name:'Venus2',
+//     image:"http://pixner.net/boleto/demo/assets/images/movie/movie03.jpg"
+//   } ],
+//   cart:[]
+// }
 
-
+export const MovieContext = createContext()
+   
 function App() {
+  //2.1
+   const [initialState, setInitialState] = useState({
+                                                      movies:[],
+                                                      cart:[]
+                                                    })
+
+
+   useEffect(()=>{
+    axios.get(`${BACKEND_URL}/api/movies?populate=*`)
+    .then(function(response){
+      //console.log('response---->',response.data.data)
+      setInitialState({
+        movies: [
+        ...response.data.data.map((cv,idx,arr)=>{
+          return {
+            name:cv.attributes.name,
+            image:BACKEND_URL+cv.attributes.image_thumb.data.attributes.url
+          }
+        })
+      ]
+      })
+    })
+    .catch(function(error){
+      console.log(error)
+    })
+    .finally(function(){
+
+    })
+   },[])
+   //2.2
+
+
+   //2.3
     return (
-      <>
+      <MovieContext.Provider value={initialState}>
+        {console.log('123----',initialState)}
         <BrowserRouter>
           <Routes>
-            <Route path='/' element={<Layout/>}>
-            <Route index element={<Home/>}></Route>
-            <Route path='/movie-list' element={<MovieList/>}></Route>
-            <Route path='/movie-details' element={<MovieDetails/>}></Route>
-            <Route path='/movie-seat-plan' element={<MovieSeatPlan/>}></Route>
-            <Route path='/movie-ticket-plan' element={<MovieTicketPlan/>}></Route>
-            <Route path='/movie-checkout' element={<MovieCheckout/>}></Route>
-            <Route path='/popcorn' element={<Popcorn/>}></Route>
+            <Route path='/' element={<Layout />}>
+            {
+              allPublicRoutes && allPublicRoutes.map((cv,idx,arr)=>{
+                return <Route key={idx} path={cv.path} element={cv.element}/>
+              })
+            }
             </Route>
             <Route path='/sign-in' element={<SignIn/>}></Route>
             <Route path='/sign-up' element={<SignUp/>}></Route>
             <Route path="*" element={<NoPage/>}></Route>
           </Routes>
         </BrowserRouter>
-      </>    
+        </MovieContext.Provider> 
     );
 } 
 
